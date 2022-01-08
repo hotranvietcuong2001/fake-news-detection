@@ -1,0 +1,4 @@
+pyvi
+streamlit
+scikit-learn
+nltk.stem.porter
