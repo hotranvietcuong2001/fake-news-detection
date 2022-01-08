@@ -1,10 +1,10 @@
 import pickle
 import streamlit as st 
+from utils import text_preprocessor
 
 
 model_dict = {
-    "Passive Aggressive Classifier": "models/pac.pkl",
-    "Logistic Regression": "models/lr.pkl", 
+    "Logistic Regression": "models/logistic-regression.pkl", 
 }
 
 
@@ -21,10 +21,10 @@ def load_models():
     return models
 
 
-# load text preprocessor
+# load text vectorizer
 @st.cache(allow_output_mutation=True)
-def load_preprocessor():
-    dir = "models/preprocessor.pkl"
+def load_vectorizer():
+    dir = "models/vectorizer.pkl"
     with open(dir, "rb") as f:
         res = pickle.load(f)
         return res
@@ -34,7 +34,7 @@ def main():
     # load models 
     models = load_models()
     # load preprocessor
-    preprocessor = load_preprocessor()
+    vectorizer = load_vectorizer()
 
     # title
     title = """<h1 style="text-align:center;">Fake news Detection</h1>"""
@@ -52,8 +52,14 @@ def main():
     if button:
         with st.spinner('Checking...'):
             model = models[selection]
-            preprocessed_news = preprocessor.transform([news])
 
+            # text preprocessing
+            preprocessed_news = text_preprocessor([news])
+
+            ## text vectorizing
+            preprocessed_news = vectorizer.transform(preprocessed_news)
+
+            ## predict
             res = model.predict(preprocessed_news)[0]
             if res == 1:
                 st.success('This is a Real news')
