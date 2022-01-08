@@ -4,7 +4,9 @@ from utils import text_preprocessor
 
 
 model_dict = {
-    "Logistic Regression": "models/logistic-regression.pkl", 
+    "Multinomial Naive Bayes": "models/naive-bayes.pkl",
+    "Logistic Regression": "models/logistic-regression.pkl",
+    "Random Forest Classifier": "models/random-forest.pkl",
 }
 
 
@@ -28,16 +30,34 @@ def load_vectorizer():
     with open(dir, "rb") as f:
         res = pickle.load(f)
         return res
-    
+
 
 def main():
+    st.set_page_config(
+        page_title="Fake News Detection",
+        page_icon="🔍",
+        menu_items={
+            'About': """
+            ### Powered By:
+            |    MSSV   |       Họ tên       |
+            |:---------:|:------------------:|
+            | 19120056  | Hồ Trần Việt Cường |
+            | 19120069  | Nguyễn Thế Hải     |
+            | 19120119  | Nguyễn Minh Phúc   |
+            | 19120130  | Trần Đức Thắng     |
+            | 19120508  | Nguyễn Đức Hiếu    |
+            """,
+        }
+    )
+
     # load models 
     models = load_models()
+
     # load preprocessor
     vectorizer = load_vectorizer()
 
     # title
-    title = """<h1 style="text-align:center;">Fake news Detection</h1>"""
+    title = """<h1 style="text-align:center;">Vietnamese Fake News Detection</h1>"""
     st.markdown(title, unsafe_allow_html=True)
 
     # model selection
@@ -51,20 +71,23 @@ def main():
     button = st.button('Check this news')
     if button:
         with st.spinner('Checking...'):
-            model = models[selection]
-
-            # text preprocessing
-            preprocessed_news = text_preprocessor([news])
-
-            ## text vectorizing
-            preprocessed_news = vectorizer.transform(preprocessed_news)
-
-            ## predict
-            res = model.predict(preprocessed_news)[0]
-            if res == 1:
-                st.success('This is a Real news')
+            if len(news) == 0:
+                st.warning('Please insert at least a piece of news')
             else:
-                st.success('This is a Fake news')
+                model = models[selection]
+
+                # text preprocessing
+                preprocessed_news = text_preprocessor([news])
+
+                ## text vectorizing
+                preprocessed_news = vectorizer.transform(preprocessed_news)
+
+                ## predict
+                res = model.predict(preprocessed_news)[0]
+                if res == 1:
+                    st.success('This is a Real news')
+                else:
+                    st.error('This is a Fake news')
 
 
 if __name__ == '__main__':
